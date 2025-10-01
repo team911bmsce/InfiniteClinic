@@ -41,25 +41,25 @@ function NavBar(props) {
           <ListItem disablePadding>
             <ListItemButton
               component={Link}
-              to="/about"
-              selected={"/about" === path}
+              to="/tests/"
+              selected={"/tests/" === path}
             >
               <ListItemIcon>
                 <InfoIcon />
               </ListItemIcon>
-              <ListItemText primary={"About"} />
+              <ListItemText primary={"Tests"} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton
               component={Link}
-              to="/create"
-              selected={"/create" === path}
+              to="/patients"
+              selected={"/patients" === path}
             >
               <ListItemIcon>
-                <CreateIcon />
+                <InfoIcon />
               </ListItemIcon>
-              <ListItemText primary={"create"} />
+              <ListItemText primary={"Patients"} />
             </ListItemButton>
           </ListItem>
         </List>

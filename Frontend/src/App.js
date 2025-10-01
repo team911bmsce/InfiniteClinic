@@ -1,11 +1,10 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./components/Home";
+import TView from "./components/tests/TView";
 import About from "./components/About";
-import Create from "./components/Create";
 import NavBar from "./components/NavBar";
-import Edit from "./components/Edit";
-import Delete from "./components/Delete";
+import PView from "./components/patients/PView";
+import TimeSlotsView from "./components/timeslots/TimeSlotsView";
 
 function App() {
   const myWidth = 240;
@@ -15,11 +14,9 @@ function App() {
         drawerWidth={myWidth}
         content={
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/create" element={<Create />} />
-            <Route path="/edit/:id" element={<Edit />} />
-            <Route path="/delete/:id" element={<Delete />} />
+            <Route path="tests/" element={<TView />} />
+            <Route path="/patients" element={<PView />} />
+            <Route path="tests/:id/timeslots" element={<TimeSlotsView />} />
           </Routes>
         }
       />

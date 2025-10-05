@@ -10,5 +10,7 @@ router.register("patients", PatientViewSet, basename="patient")
 router.register("timeslot", TimeSlotViewSet, basename="timeslot")
 
 
-urlpatterns = router.urls
-
+urlpatterns = router.urls + [
+    path('payment/create-order/', CreateOrderView.as_view(), name='create-order'),
+    path('payment/verify/', VerifyPaymentView.as_view(), name='verify-payment'),
+]

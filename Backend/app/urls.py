@@ -4,13 +4,12 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 
-router.register("test", TestViewSet, basename="test")
-router.register("branch", BranchViewSet, basename="branch")
-router.register("patients", PatientViewSet, basename="patient")
+router.register("test", TestViewSet, basename="tests")
+router.register("packages", PackageViewSet, basename="packages")
+router.register("patients", PatientViewSet, basename="patients")
 router.register("timeslot", TimeSlotViewSet, basename="timeslot")
 
 
 urlpatterns = router.urls + [
-    path('payment/create-order/', CreateOrderView.as_view(), name='create-order'),
-    path('payment/verify/', VerifyPaymentView.as_view(), name='verify-payment'),
+
 ]

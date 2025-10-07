@@ -2,10 +2,10 @@ from rest_framework import serializers
 from .models import *
 
 
-class BranchSerializer(serializers.ModelSerializer):
+class PackageSerializer(serializers.ModelSerializer):
 
     class Meta: 
-        model=Branch
+        model=Package
         fields=("name", "id")
 
 
@@ -16,26 +16,26 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class TestSerializer(serializers.ModelSerializer):
-    branch = serializers.PrimaryKeyRelatedField( queryset=Branch.objects.all(), allow_null=True, required=False)
+    package = serializers.PrimaryKeyRelatedField( queryset=Package.objects.all(), allow_null=True, required=False)
 
     class Meta:
         model = Test
-        fields = ("id", "testid", "name","description", "branch", "price")
+        fields = "__all__"
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
-    # Optional: display test name in read-only mode
     test_name = serializers.CharField(source="test.name", read_only=True)
 
     class Meta:
         model = TimeSlot
         fields = (
-            "slotid",
+            "id",             # ← Add this line
             "test",
-            "test_name",  # for frontend display
+            "test_name",
             "date",
             "start_time",
             "end_time",
             "max_patients",
         )
+
 

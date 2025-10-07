@@ -20,26 +20,19 @@ import { Edit as EditIcon, Add as AddIcon } from "@mui/icons-material";
 const PView = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // modal state
   const [open, setOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    pid: "",
     first_name: "",
-    last_name: "",
     age: "",
     gender: "M",
     phone_number: "",
     email: "",
-    address: "",
   });
 
   const [formErrors, setFormErrors] = useState({});
-  const [saving, setSaving] = useState(false);
-
-  // Snackbar feedback
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -50,14 +43,12 @@ const PView = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   // Fetch patients
   const GetPatients = () => {
     setLoading(true);
-    AxiosInstance.get(`patients/`)
+    AxiosInstance.get("patients/")
       .then((res) => {
         setPatients(res.data);
         setLoading(false);
@@ -73,17 +64,16 @@ const PView = () => {
     GetPatients();
   }, []);
 
-  // Handle input
+  // Input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Form validation
+  // Validation
   const validateForm = () => {
     let errors = {};
 
-    if (!formData.pid) errors.pid = "Patient ID is required";
     if (!formData.first_name) errors.first_name = "First name is required";
     if (!formData.age || formData.age <= 0)
       errors.age = "Valid age is required";
@@ -96,7 +86,7 @@ const PView = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Open modal (for create or edit)
+  // Open/close modal
   const handleOpen = (patient = null) => {
     if (patient) {
       setEditingPatient(patient);
@@ -104,14 +94,11 @@ const PView = () => {
     } else {
       setEditingPatient(null);
       setFormData({
-        pid: "",
         first_name: "",
-        last_name: "",
         age: "",
         gender: "M",
         phone_number: "",
         email: "",
-        address: "",
       });
     }
     setFormErrors({});
@@ -123,44 +110,37 @@ const PView = () => {
     setEditingPatient(null);
   };
 
-  // Submit (Create or Update)
+  // Submit form
   const handleSubmit = () => {
     if (!validateForm()) return;
-
     setSaving(true);
-    if (editingPatient) {
-      AxiosInstance.put(`patients/${editingPatient.id}/`, formData)
-        .then(() => {
-          GetPatients();
-          handleClose();
-          showSnackbar("Patient updated successfully!");
-        })
-        .catch((err) => {
-          console.error("Error updating patient:", err.response?.data);
-          showSnackbar("Error updating patient", "error");
-        })
-        .finally(() => setSaving(false));
-    } else {
-      AxiosInstance.post("patients/", formData)
-        .then(() => {
-          GetPatients();
-          handleClose();
-          showSnackbar("Patient created successfully!");
-        })
-        .catch((err) => {
-          console.error("Error creating patient:", err.response?.data);
-          showSnackbar("Error creating patient", "error");
-        })
-        .finally(() => setSaving(false));
-    }
+
+    const request = editingPatient
+      ? AxiosInstance.put(`patients/${editingPatient.id}/`, formData)
+      : AxiosInstance.post("patients/", formData);
+
+    request
+      .then(() => {
+        GetPatients();
+        handleClose();
+        showSnackbar(
+          editingPatient
+            ? "Patient updated successfully!"
+            : "Patient created successfully!"
+        );
+      })
+      .catch((err) => {
+        console.error("Error saving patient:", err.response?.data);
+        showSnackbar("Error saving patient", "error");
+      })
+      .finally(() => setSaving(false));
   };
 
   // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "pid", header: "PID", size: 80 },
+      { accessorKey: "id", header: "ID", size: 70 },
       { accessorKey: "first_name", header: "First Name", size: 150 },
-      { accessorKey: "last_name", header: "Last Name", size: 150 },
       { accessorKey: "age", header: "Age", size: 80 },
       {
         accessorKey: "gender",
@@ -168,9 +148,7 @@ const PView = () => {
         size: 100,
         Cell: ({ cell }) => {
           const val = cell.getValue();
-          if (val === "M") return "Male";
-          if (val === "F") return "Female";
-          return "Other";
+          return val === "M" ? "Male" : val === "F" ? "Female" : "Other";
         },
       },
       { accessorKey: "phone_number", header: "Phone", size: 150 },
@@ -187,7 +165,7 @@ const PView = () => {
           startIcon={<AddIcon />}
           onClick={() => handleOpen()}
         >
-          Add Patient
+          Add
         </Button>
       </Box>
 
@@ -199,7 +177,7 @@ const PView = () => {
         <MaterialReactTable
           enableRowActions
           renderRowActions={({ row }) => (
-            <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
+            <Box sx={{ display: "flex", gap: "8px" }}>
               <IconButton
                 color="secondary"
                 onClick={() => handleOpen(row.original)}
@@ -213,23 +191,10 @@ const PView = () => {
         />
       )}
 
-      {/* Modal for Create / Edit */}
+      {/* Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          {editingPatient ? "Edit Patient" : "Add Patient"}
-        </DialogTitle>
+        <DialogTitle>{editingPatient ? "Edit" : "Add"}</DialogTitle>
         <DialogContent dividers>
-          <TextField
-            margin="dense"
-            label="Patient ID"
-            name="pid"
-            value={formData.pid}
-            onChange={handleChange}
-            fullWidth
-            required
-            error={!!formErrors.pid}
-            helperText={formErrors.pid}
-          />
           <TextField
             margin="dense"
             label="First Name"
@@ -240,14 +205,6 @@ const PView = () => {
             required
             error={!!formErrors.first_name}
             helperText={formErrors.first_name}
-          />
-          <TextField
-            margin="dense"
-            label="Last Name"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            fullWidth
           />
           <TextField
             margin="dense"
@@ -269,7 +226,6 @@ const PView = () => {
             value={formData.gender}
             onChange={handleChange}
             fullWidth
-            required
           >
             <MenuItem value="M">Male</MenuItem>
             <MenuItem value="F">Female</MenuItem>
@@ -295,16 +251,6 @@ const PView = () => {
             error={!!formErrors.email}
             helperText={formErrors.email}
           />
-          <TextField
-            margin="dense"
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={2}
-          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
@@ -320,7 +266,7 @@ const PView = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for alerts */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

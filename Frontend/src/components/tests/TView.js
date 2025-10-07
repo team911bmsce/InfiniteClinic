@@ -5,12 +5,16 @@ import {
   Box,
   IconButton,
   Button,
-  Modal,
-  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   MenuItem,
-  CircularProgress,
+  Snackbar,
   Alert,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -22,80 +26,62 @@ import { useNavigate } from "react-router-dom";
 
 const TView = () => {
   const [tests, setTests] = useState([]);
-  const [branches, setBranches] = useState([]);
+  const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    testid: "",
     name: "",
     description: "",
     price: "",
-    branch: "",
+    package: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
   });
 
   const navigate = useNavigate();
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleSnackbarClose = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
 
   // Fetch tests
   const fetchTests = () => {
     setLoading(true);
     AxiosInstance.get("test/")
       .then((res) => setTests(res.data))
-      .catch((err) =>
-        console.error("Error fetching tests:", err.response?.data || err)
-      )
+      .catch((err) => {
+        console.error("Error fetching tests:", err.response?.data);
+        showSnackbar("Error fetching tests", "error");
+      })
       .finally(() => setLoading(false));
   };
 
-  // Fetch branches
-  const fetchBranches = () => {
-    AxiosInstance.get("branch/")
-      .then((res) => setBranches(res.data))
+  // Fetch packages
+  const fetchPackages = () => {
+    AxiosInstance.get("packages/")
+      .then((res) => setPackages(res.data))
       .catch((err) =>
-        console.error("Error fetching branches:", err.response?.data || err)
+        console.error("Error fetching packages:", err.response?.data)
       );
   };
 
   useEffect(() => {
     fetchTests();
-    fetchBranches();
+    fetchPackages();
   }, []);
 
-  // Modal handlers
-  const openModal = (test = null) => {
-    setEditingTest(test);
-    setErrorMsg(null);
-    if (test) {
-      setFormData({
-        testid: test.testid || "",
-        name: test.name || "",
-        description: test.description || "",
-        price: test.price || "",
-        branch: test.branch || "",
-      });
-    } else {
-      setFormData({
-        testid: "",
-        name: "",
-        description: "",
-        price: "",
-        branch: "",
-      });
-    }
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setEditingTest(null);
-    setErrorMsg(null);
-  };
-
-  // Input change
+  // Handle input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -103,34 +89,53 @@ const TView = () => {
 
   // Validation
   const validateForm = () => {
-    if (!formData.testid) return "Test ID is required.";
-    if (isNaN(formData.testid)) return "Test ID must be a number.";
-    if (!formData.name.trim()) return "Name is required.";
+    const errors = {};
+    if (!formData.name.trim()) errors.name = "Name is required";
     if (formData.price && isNaN(formData.price))
-      return "Price must be a number.";
-    return null;
+      errors.price = "Price must be a valid number";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Open/Close dialog
+  const handleOpen = (test = null) => {
+    if (test) {
+      setEditingTest(test);
+      setFormData({
+        name: test.name || "",
+        description: test.description || "",
+        price: test.price || "",
+        package: test.package || "",
+      });
+    } else {
+      setEditingTest(null);
+      setFormData({
+        name: "",
+        description: "",
+        price: "",
+        package: "",
+      });
+    }
+    setFormErrors({});
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setEditingTest(null);
   };
 
   // Submit form
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setErrorMsg(null);
-
-    const validationError = validateForm();
-    if (validationError) {
-      setErrorMsg(validationError);
-      return;
-    }
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    setSaving(true);
 
     const payload = {
-      testid: parseInt(formData.testid, 10),
       name: formData.name,
       description: formData.description || null,
       price: formData.price ? parseFloat(formData.price) : null,
-      branch: formData.branch ? parseInt(formData.branch, 10) : null,
+      package: formData.package ? parseInt(formData.package, 10) : null,
     };
-
-    setSubmitting(true);
 
     const request = editingTest
       ? AxiosInstance.put(`test/${editingTest.id}/`, payload)
@@ -139,33 +144,40 @@ const TView = () => {
     request
       .then(() => {
         fetchTests();
-        closeModal();
+        handleClose();
+        showSnackbar(
+          editingTest
+            ? "Test updated successfully!"
+            : "Test created successfully!"
+        );
       })
       .catch((err) => {
-        console.error("Error saving test:", err.response?.data || err);
-        setErrorMsg(err.response?.data?.detail || "Failed to save test.");
+        console.error("Error saving test:", err.response?.data);
+        showSnackbar("Error saving test", "error");
       })
-      .finally(() => setSubmitting(false));
+      .finally(() => setSaving(false));
   };
 
-  // Delete test
+  // Delete
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this test?")) {
       AxiosInstance.delete(`test/${id}/`)
-        .then(() => fetchTests())
+        .then(() => {
+          fetchTests();
+          showSnackbar("Test deleted successfully!");
+        })
         .catch((err) => {
-          console.error("Error deleting test:", err.response?.data || err);
-          alert("Failed to delete test.");
+          console.error("Error deleting test:", err.response?.data);
+          showSnackbar("Failed to delete test", "error");
         });
     }
   };
 
-  // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "testid", header: "Test ID", size: 100 },
+      { accessorKey: "id", header: "ID", size: 80 },
       { accessorKey: "name", header: "Test Name", size: 200 },
-      { accessorKey: "description", header: "Description", size: 300 },
+      { accessorKey: "description", header: "Description", size: 250 },
       {
         accessorKey: "price",
         header: "Price (₹)",
@@ -174,44 +186,47 @@ const TView = () => {
           cell.getValue() ? `₹${parseFloat(cell.getValue()).toFixed(2)}` : "-",
       },
       {
-        accessorKey: "branch",
-        header: "Branch",
+        accessorKey: "package",
+        header: "Package",
         size: 150,
         Cell: ({ cell }) => {
-          const branchObj = branches.find((b) => b.id === cell.getValue());
-          return branchObj ? branchObj.name : "-";
+          const pkg = packages.find((p) => p.id === cell.getValue());
+          return pkg ? pkg.name : "-";
         },
       },
     ],
-    [branches]
+    [packages]
   );
 
   return (
     <div>
-      {/* Top Bar */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h5">Manage Tests</Typography>
+        <Typography variant="h5" fontWeight={600}>
+          Manage Tests
+        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => openModal()}
+          onClick={() => handleOpen()}
         >
-          Add Test
+          Add
         </Button>
       </Box>
 
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+          <CircularProgress />
+        </Box>
       ) : (
         <MaterialReactTable
           columns={columns}
           data={tests}
           enableRowActions
           renderRowActions={({ row }) => (
-            <Box sx={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
+            <Box sx={{ display: "flex", gap: "8px" }}>
               <IconButton
                 color="secondary"
-                onClick={() => openModal(row.original)}
+                onClick={() => handleOpen(row.original)}
               >
                 <EditIcon />
               </IconButton>
@@ -232,88 +247,87 @@ const TView = () => {
         />
       )}
 
-      {/* Modal */}
-      <Modal open={modalOpen} onClose={closeModal}>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 450,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h6">
-            {editingTest ? "Edit Test" : "Add Test"}
-          </Typography>
-
-          {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-
+      {/* Dialog Form */}
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>{editingTest ? "Edit Test" : "Add Test"}</DialogTitle>
+        <DialogContent dividers>
           <TextField
-            label="Test ID"
-            name="testid"
-            value={formData.testid}
-            onChange={handleChange}
-            type="number"
-            required
-          />
-          <TextField
+            margin="dense"
             label="Name"
             name="name"
+            fullWidth
+            required
             value={formData.name}
             onChange={handleChange}
-            required
+            error={!!formErrors.name}
+            helperText={formErrors.name}
           />
           <TextField
+            margin="dense"
             label="Description"
             name="description"
+            fullWidth
+            multiline
+            rows={3}
             value={formData.description}
             onChange={handleChange}
-            multiline
-            rows={2}
           />
           <TextField
+            margin="dense"
             label="Price (₹)"
             name="price"
             type="number"
+            fullWidth
             value={formData.price}
             onChange={handleChange}
+            error={!!formErrors.price}
+            helperText={formErrors.price}
           />
-
           <TextField
             select
-            label="Branch"
-            name="branch"
-            value={formData.branch}
+            margin="dense"
+            label="Package"
+            name="package"
+            fullWidth
+            value={formData.package}
             onChange={handleChange}
           >
-            <MenuItem value="">-- Select Branch --</MenuItem>
-            {branches.map((branch) => (
-              <MenuItem key={branch.id} value={branch.id}>
-                {branch.name}
+            <MenuItem value="">-- Select Package --</MenuItem>
+            {packages.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
               </MenuItem>
             ))}
           </TextField>
-
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={submitting}
-            startIcon={submitting && <CircularProgress size={20} />}
-          >
-            {editingTest ? "Update Test" : "Add Test"}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit} disabled={saving}>
+            {saving ? (
+              <CircularProgress size={20} />
+            ) : editingTest ? (
+              "Update"
+            ) : (
+              "Create"
+            )}
           </Button>
-        </Box>
-      </Modal>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

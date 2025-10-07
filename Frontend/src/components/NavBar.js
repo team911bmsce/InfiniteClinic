@@ -59,7 +59,7 @@ function NavBar(props) {
               <ListItemIcon>
                 <InfoIcon />
               </ListItemIcon>
-              <ListItemText primary={"Patients"} />
+              <ListItemText primary={"User"} />
             </ListItemButton>
           </ListItem>
         </List>

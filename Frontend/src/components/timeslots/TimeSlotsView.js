@@ -9,6 +9,9 @@ import {
   Typography,
   TextField,
   Chip,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -18,38 +21,54 @@ import {
 import { useParams } from "react-router-dom";
 
 const TimeSlotsView = () => {
-  const { id: testId } = useParams(); // test ID from URL
-  const [test, setTest] = useState(null); // ✅ test details
+  const { id: testId } = useParams();
+  const [test, setTest] = useState(null);
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   const [formData, setFormData] = useState({
     date: "",
     start_time: "",
     end_time: "",
     max_patients: 1,
   });
+  const [formErrors, setFormErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  // Fetch test details
-  const fetchTest = () => {
-    AxiosInstance.get(`test/${testId}/`)
-      .then((res) => setTest(res.data))
-      .catch((err) =>
-        console.error("Error fetching test:", err.response?.data || err)
-      );
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+  const handleSnackbarClose = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
+
+  // ---------------- Fetch Data ----------------
+  const fetchTest = async () => {
+    try {
+      const res = await AxiosInstance.get(`test/${testId}/`);
+      setTest(res.data);
+    } catch (err) {
+      console.error("Error fetching test:", err);
+      showSnackbar("Error fetching test details", "error");
+    }
   };
 
-  // Fetch slots for this test
-  const fetchSlots = () => {
-    AxiosInstance.get(`timeslot/?test_id=${testId}`)
-      .then((res) => {
-        setSlots(res.data);
-        setLoading(false);
-      })
-      .catch((err) =>
-        console.error("Error fetching slots:", err.response?.data || err)
-      );
+  const fetchSlots = async () => {
+    try {
+      const res = await AxiosInstance.get(`timeslot/?test_id=${testId}`);
+      setSlots(res.data);
+    } catch (err) {
+      console.error("Error fetching slots:", err);
+      showSnackbar("Error fetching slots", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -57,11 +76,12 @@ const TimeSlotsView = () => {
     fetchSlots();
   }, []);
 
-  // Modal open/close
+  // ---------------- Modal Handling ----------------
   const openModal = (slot = null) => {
     setEditingSlot(slot);
     if (slot) {
       setFormData({
+        id: slot.id,
         date: slot.date,
         start_time: slot.start_time,
         end_time: slot.end_time,
@@ -69,12 +89,14 @@ const TimeSlotsView = () => {
       });
     } else {
       setFormData({
+        id: null,
         date: "",
         start_time: "",
         end_time: "",
         max_patients: 1,
       });
     }
+    setFormErrors({});
     setModalOpen(true);
   };
 
@@ -83,16 +105,26 @@ const TimeSlotsView = () => {
     setEditingSlot(null);
   };
 
-  // Handle form input
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // ---------------- Form Validation ----------------
+  const validateForm = () => {
+    const errors = {};
+    const { date, start_time, end_time, max_patients } = formData;
+
+    if (!date) errors.date = "Date is required";
+    if (!start_time) errors.start_time = "Start time is required";
+    if (!end_time) errors.end_time = "End time is required";
+    if (start_time && end_time && start_time >= end_time)
+      errors.end_time = "End time must be after start time";
+    if (!max_patients || isNaN(max_patients) || max_patients <= 0)
+      errors.max_patients = "Enter a valid number of patients";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  // Overlap check
   const checkOverlap = (newSlot) => {
     return slots.some((slot) => {
-      if (editingSlot && slot.slotid === editingSlot.slotid) return false;
+      if (editingSlot && slot.id === editingSlot.id) return false;
       return (
         slot.date === newSlot.date &&
         !(
@@ -103,9 +135,11 @@ const TimeSlotsView = () => {
     });
   };
 
-  // Submit
-  const handleSubmit = (e) => {
+  // ---------------- Submit ----------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     const payload = {
       ...formData,
       max_patients: parseInt(formData.max_patients, 10),
@@ -113,61 +147,53 @@ const TimeSlotsView = () => {
     };
 
     if (checkOverlap(payload)) {
-      alert(
-        "⚠️ This time slot overlaps with an existing one on the same date!"
-      );
+      showSnackbar("This time slot overlaps with an existing one!", "warning");
       return;
     }
 
-    if (editingSlot) {
-      AxiosInstance.put(`timeslot/${editingSlot.slotid}/`, payload)
-        .then(() => {
-          fetchSlots();
-          closeModal();
-        })
-        .catch((err) =>
-          console.error("Error updating slot:", err.response?.data || err)
-        );
-    } else {
-      AxiosInstance.post("timeslot/", payload)
-        .then(() => {
-          fetchSlots();
-          closeModal();
-        })
-        .catch((err) =>
-          console.error("Error creating slot:", err.response?.data || err)
-        );
+    setSaving(true);
+
+    try {
+      if (editingSlot && editingSlot.id) {
+        await AxiosInstance.put(`timeslot/${editingSlot.id}/`, payload);
+        showSnackbar("Slot updated successfully!");
+      } else {
+        await AxiosInstance.post("timeslot/", payload);
+        showSnackbar("Slot created successfully!");
+      }
+      fetchSlots();
+      closeModal();
+    } catch (err) {
+      console.error("Error saving slot:", err);
+      showSnackbar("Error saving slot", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Delete slot
-  const handleDelete = (slotId) => {
-    if (window.confirm("Are you sure you want to delete this slot?")) {
-      AxiosInstance.delete(`timeslot/${slotId}/`)
-        .then(() => fetchSlots())
-        .catch((err) =>
-          console.error("Error deleting slot:", err.response?.data || err)
-        );
+  const handleDelete = async (slotId) => {
+    if (!window.confirm("Are you sure you want to delete this slot?")) return;
+    try {
+      await AxiosInstance.delete(`timeslot/${slotId}/`);
+      fetchSlots();
+      showSnackbar("Slot deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting slot:", err);
+      showSnackbar("Error deleting slot", "error");
     }
   };
 
-  // Table columns
+  // ---------------- Table Columns ----------------
   const columns = useMemo(
     () => [
-      { accessorKey: "slotid", header: "Slot ID", size: 80 },
+      { accessorKey: "id", header: "ID", size: 80 },
       { accessorKey: "date", header: "Date", size: 150 },
-      { accessorKey: "start_time", header: "Start Time", size: 100 },
-      { accessorKey: "end_time", header: "End Time", size: 100 },
+      { accessorKey: "start_time", header: "Start Time", size: 120 },
+      { accessorKey: "end_time", header: "End Time", size: 120 },
       { accessorKey: "max_patients", header: "Capacity", size: 120 },
       {
-        accessorKey: "booked_patients",
-        header: "Booked",
-        size: 100,
-        Cell: ({ row }) => row.original.booked_patients || 0,
-      },
-      {
         header: "Available",
-        size: 120,
+        size: 150,
         Cell: ({ row }) => {
           const available =
             (row.original.max_patients || 0) -
@@ -185,12 +211,13 @@ const TimeSlotsView = () => {
     []
   );
 
+  // ---------------- JSX ----------------
   return (
-    <div>
-      {/* ✅ Show test name */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h5">
-          <b>{test ? `${test.name}` : ""}</b> Time Slots:
+    <Box sx={{ p: 3, bgcolor: "#f9fafc", minHeight: "100vh" }}>
+      {/* Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          {test ? `${test.name}` : "Test"} — Time Slots
         </Typography>
         <Button
           variant="contained"
@@ -201,8 +228,11 @@ const TimeSlotsView = () => {
         </Button>
       </Box>
 
+      {/* Table */}
       {loading ? (
-        <p>Loading slots...</p>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+          <CircularProgress />
+        </Box>
       ) : (
         <MaterialReactTable
           columns={columns}
@@ -218,7 +248,7 @@ const TimeSlotsView = () => {
               </IconButton>
               <IconButton
                 color="error"
-                onClick={() => handleDelete(row.original.slotid)}
+                onClick={() => handleDelete(row.original.id)}
               >
                 <DeleteIcon />
               </IconButton>
@@ -227,7 +257,7 @@ const TimeSlotsView = () => {
         />
       )}
 
-      {/* Modal for Add/Edit */}
+      {/* Modal */}
       <Modal open={modalOpen} onClose={closeModal}>
         <Box
           component="form"
@@ -237,7 +267,7 @@ const TimeSlotsView = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 420,
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
@@ -247,51 +277,102 @@ const TimeSlotsView = () => {
             gap: 2,
           }}
         >
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {editingSlot ? "Edit Slot" : "Add Slot"}
           </Typography>
+
           <TextField
             label="Date"
             type="date"
             name="date"
             value={formData.date}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, date: e.target.value }))
+            }
             InputLabelProps={{ shrink: true }}
+            error={!!formErrors.date}
+            helperText={formErrors.date}
             required
           />
+
           <TextField
             label="Start Time"
             type="time"
             name="start_time"
             value={formData.start_time}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, start_time: e.target.value }))
+            }
             InputLabelProps={{ shrink: true }}
+            error={!!formErrors.start_time}
+            helperText={formErrors.start_time}
             required
           />
+
           <TextField
             label="End Time"
             type="time"
             name="end_time"
             value={formData.end_time}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, end_time: e.target.value }))
+            }
             InputLabelProps={{ shrink: true }}
+            error={!!formErrors.end_time}
+            helperText={formErrors.end_time}
             required
           />
+
           <TextField
             label="Max Patients"
             type="number"
             name="max_patients"
             value={formData.max_patients}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                max_patients: e.target.value,
+              }))
+            }
             inputProps={{ min: 1 }}
+            error={!!formErrors.max_patients}
+            helperText={formErrors.max_patients}
             required
           />
-          <Button type="submit" variant="contained">
-            {editingSlot ? "Update Slot" : "Add Slot"}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={saving}
+            sx={{ borderRadius: 2, fontWeight: 600 }}
+          >
+            {saving ? (
+              <CircularProgress size={20} sx={{ color: "white" }} />
+            ) : editingSlot ? (
+              "Update Slot"
+            ) : (
+              "Add Slot"
+            )}
           </Button>
         </Box>
       </Modal>
-    </div>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

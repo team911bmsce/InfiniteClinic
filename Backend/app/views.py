@@ -2,9 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-<<<<<<< Updated upstream
 from rest_framework.views import APIView
-from .models import Branch, Test, Patient
+from .models import *
 from .serializers import *
 import razorpay
 from django.conf import settings
@@ -13,11 +12,11 @@ from django.conf import settings
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
-=======
+
 from .models import *
 from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
->>>>>>> Stashed changes
+
 
 
 def home(request):
@@ -50,10 +49,16 @@ class TestViewSet(viewsets.ModelViewSet):
     filterset_fields = ['name', 'package']  # backend filter
 
 
-
 class TimeSlotViewSet(viewsets.ModelViewSet):
-    queryset = TimeSlot.objects.all()
     serializer_class = TimeSlotSerializer
+
+    def get_queryset(self):
+        queryset = TimeSlot.objects.all()
+        test_id = self.request.query_params.get("test_id")
+        if test_id:
+            queryset = queryset.filter(test_id=test_id)
+        return queryset
+
 
 
 

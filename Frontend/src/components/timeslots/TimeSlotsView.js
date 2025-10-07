@@ -12,6 +12,9 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Checkbox,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -34,6 +37,8 @@ const TimeSlotsView = () => {
     start_time: "",
     end_time: "",
     max_patients: 1,
+    unlimited_patients: true,
+    available: true,
   });
   const [formErrors, setFormErrors] = useState({});
   const [snackbar, setSnackbar] = useState({
@@ -85,7 +90,9 @@ const TimeSlotsView = () => {
         date: slot.date,
         start_time: slot.start_time,
         end_time: slot.end_time,
-        max_patients: slot.max_patients,
+        max_patients: slot.max_patients || 1,
+        unlimited_patients: slot.unlimited_patients ?? true,
+        available: slot.available ?? true,
       });
     } else {
       setFormData({
@@ -94,6 +101,8 @@ const TimeSlotsView = () => {
         start_time: "",
         end_time: "",
         max_patients: 1,
+        unlimited_patients: true,
+        available: true,
       });
     }
     setFormErrors({});
@@ -108,15 +117,18 @@ const TimeSlotsView = () => {
   // ---------------- Form Validation ----------------
   const validateForm = () => {
     const errors = {};
-    const { date, start_time, end_time, max_patients } = formData;
+    const { date, start_time, end_time, unlimited_patients, max_patients } =
+      formData;
 
     if (!date) errors.date = "Date is required";
     if (!start_time) errors.start_time = "Start time is required";
     if (!end_time) errors.end_time = "End time is required";
     if (start_time && end_time && start_time >= end_time)
       errors.end_time = "End time must be after start time";
-    if (!max_patients || isNaN(max_patients) || max_patients <= 0)
-      errors.max_patients = "Enter a valid number of patients";
+    if (!unlimited_patients) {
+      if (!max_patients || isNaN(max_patients) || max_patients <= 0)
+        errors.max_patients = "Enter a valid number of patients";
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -141,9 +153,15 @@ const TimeSlotsView = () => {
     if (!validateForm()) return;
 
     const payload = {
-      ...formData,
-      max_patients: parseInt(formData.max_patients, 10),
       test: parseInt(testId, 10),
+      date: formData.date,
+      start_time: formData.start_time,
+      end_time: formData.end_time,
+      unlimited_patients: formData.unlimited_patients,
+      available: formData.available,
+      max_patients: formData.unlimited_patients
+        ? null
+        : parseInt(formData.max_patients, 10),
     };
 
     if (checkOverlap(payload)) {
@@ -190,22 +208,41 @@ const TimeSlotsView = () => {
       { accessorKey: "date", header: "Date", size: 150 },
       { accessorKey: "start_time", header: "Start Time", size: 120 },
       { accessorKey: "end_time", header: "End Time", size: 120 },
-      { accessorKey: "max_patients", header: "Capacity", size: 120 },
       {
+        accessorKey: "unlimited_patients",
+        header: "Unlimited?",
+        size: 120,
+        Cell: ({ row }) =>
+          row.original.unlimited_patients ? (
+            <Chip label="Yes" color="success" size="small" />
+          ) : (
+            <Chip label="No" color="default" size="small" />
+          ),
+      },
+      {
+        accessorKey: "max_patients",
+        header: "Max Patients",
+        size: 120,
+        Cell: ({ row }) =>
+          row.original.unlimited_patients ? (
+            <Typography variant="body2" color="text.secondary">
+              ∞
+            </Typography>
+          ) : (
+            row.original.max_patients
+          ),
+      },
+      {
+        accessorKey: "available",
         header: "Available",
         size: 150,
-        Cell: ({ row }) => {
-          const available =
-            (row.original.max_patients || 0) -
-            (row.original.booked_patients || 0);
-          return (
-            <Chip
-              label={available > 0 ? `${available} left` : "Full"}
-              color={available > 0 ? "success" : "error"}
-              size="small"
-            />
-          );
-        },
+        Cell: ({ row }) => (
+          <Chip
+            label={row.original.available ? "Available" : "Unavailable"}
+            color={row.original.available ? "success" : "error"}
+            size="small"
+          />
+        ),
       },
     ],
     []
@@ -323,6 +360,21 @@ const TimeSlotsView = () => {
             required
           />
 
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.unlimited_patients}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    unlimited_patients: e.target.checked,
+                  }))
+                }
+              />
+            }
+            label="Unlimited Patients"
+          />
+
           <TextField
             label="Max Patients"
             type="number"
@@ -335,9 +387,29 @@ const TimeSlotsView = () => {
               }))
             }
             inputProps={{ min: 1 }}
-            error={!!formErrors.max_patients}
-            helperText={formErrors.max_patients}
-            required
+            disabled={formData.unlimited_patients}
+            error={!formData.unlimited_patients && !!formErrors.max_patients}
+            helperText={
+              formData.unlimited_patients
+                ? "Disabled for unlimited slots"
+                : formErrors.max_patients
+            }
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.available}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    available: e.target.checked,
+                  }))
+                }
+                color="success"
+              />
+            }
+            label={formData.available ? "Available" : "Unavailable"}
           />
 
           <Button

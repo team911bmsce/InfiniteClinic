@@ -39,23 +39,28 @@ class Patient(models.Model):
 
 
 
-class TimeSlot(models.Model):  
+class TimeSlot(models.Model):
     test = models.ForeignKey(
         Test,
         on_delete=models.CASCADE,
-        related_name="timeslots"  # allows test.timeslots.all()
+        related_name="timeslots"
     )
-    date = models.DateField()           # date of the slot
-    start_time = models.TimeField()     # start time of the slot
-    end_time = models.TimeField()       # end time of the slot
-    max_patients = models.PositiveIntegerField(default=1)  # number of patients allowed
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    max_patients = models.PositiveIntegerField(blank=True, null=True)
+    unlimited_patients = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["date", "start_time"]
         unique_together = ("test", "date", "start_time", "end_time")
-        # prevents duplicate slots for the same test at the same time
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.unlimited_patients and (self.max_patients is None or self.max_patients <= 0):
+            raise ValidationError("max_patients must be set when unlimited_patients is False.")
 
     def __str__(self):
-        return f"{self.test.name} - {self.date} {self.start_time} to {self.end_time} ({self.max_patients} patients)"
-
-
+        status = "Unlimited" if self.unlimited_patients else f"Max {self.max_patients}"
+        return f"{self.test.name} — {self.date} {self.start_time}-{self.end_time} ({status})"

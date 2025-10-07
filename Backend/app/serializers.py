@@ -29,13 +29,22 @@ class TimeSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeSlot
         fields = (
-            "id",             # ← Add this line
+            "id",
             "test",
             "test_name",
             "date",
             "start_time",
             "end_time",
             "max_patients",
+            "unlimited_patients",
+            "available",
         )
+
+    def validate(self, data):
+        if not data.get("unlimited_patients") and not data.get("max_patients"):
+            raise serializers.ValidationError({
+                "max_patients": "This field is required when unlimited_patients is False."
+            })
+        return data
 
 

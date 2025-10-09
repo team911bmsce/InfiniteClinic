@@ -19,6 +19,42 @@ class Test(models.Model):
     def __str__(self):
         return f"{self.name} - ₹{self.price}"
 
+class Consultation(models.Model):
+    docname = models.CharField(max_length=255)  # e.g., "Complete Blood Count"
+    specialization = models.CharField(blank=True, null=True)  # optional details
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # test price  # approx duration
+    class Meta:
+        ordering = ["docname"]
+
+    def __str__(self):
+        return f"{self.name} - ₹{self.price}"
+    
+class ConsultTimeSlot(models.Model):
+    doctor = models.ForeignKey(
+        Consultation,
+        on_delete=models.CASCADE,
+        related_name="consultations"
+    )
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    max_patients = models.PositiveIntegerField(blank=True, null=True)
+    unlimited_patients = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["date", "start_time"]
+        unique_together = ("doctor", "date", "start_time", "end_time")
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.unlimited_patients and (self.max_patients is None or self.max_patients <= 0):
+            raise ValidationError("max_patients must be set when unlimited_patients is False.")
+
+    def __str__(self):
+        status = "Unlimited" if self.unlimited_patients else f"Max {self.max_patients}"
+        return f"{self.test.name} — {self.date} {self.start_time}-{self.end_time} ({status})"
+
 
 
 class Patient(models.Model):

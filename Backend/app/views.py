@@ -58,6 +58,23 @@ class TimeSlotViewSet(viewsets.ModelViewSet):
         if test_id:
             queryset = queryset.filter(test_id=test_id)
         return queryset
+    
+class ConsultViewSet(viewsets.ModelViewSet):
+    queryset = Consultation.objects.all()
+    serializer_class = ConsultationSerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+
+
+class ConsultTimeSlotViewSet(viewsets.ModelViewSet):
+    serializer_class = ConsultTimeSlotSerializer
+
+    def get_queryset(self):
+        queryset = ConsultTimeSlot.objects.all()
+        doctor_id = self.request.query_params.get("doctor_id")
+        if doctor_id:
+            queryset = queryset.filter(doctor_id=doctor_id)
+        return queryset
 
 
 

@@ -58,7 +58,7 @@ function App() {
           <Route
             path="/hello"
             element={
-              <PrivateRoute allowedRoles={["admin", "patient"]}>
+              <PrivateRoute allowedRoles={["admin"]}>
                 <NavBar drawerWidth={drawerWidth} content={<Hello />} />
               </PrivateRoute>
             }

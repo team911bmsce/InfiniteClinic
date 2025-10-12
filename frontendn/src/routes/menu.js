@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { get_notes } from "../api/endpoints";
+import { get_todos } from "../api/endpoints";
 import { useAuth } from "../context/useAuth";
 import {
   Box,
@@ -19,7 +19,7 @@ const Menu = () => {
 
   useEffect(() => {
     const fetchNotes = async () => {
-      const data = await get_notes();
+      const data = await get_todos();
       setNotes(data);
     };
     fetchNotes();

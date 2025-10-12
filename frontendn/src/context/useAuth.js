@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { authenticated_user, login, logout, register } from "../api/endpoints";
 
 const AuthContext = createContext();
@@ -12,19 +11,19 @@ export const AuthProvider = ({ children }) => {
 
   const get_authenticated_user = async () => {
     try {
-      const user = await authenticated_user();
-      setUser(user);
+      const fetchedUser = await authenticated_user();
+      setUser(fetchedUser);
     } catch (error) {
-      setUser(null); // If the request fails, set the user to null
+      setUser(null);
     } finally {
-      setLoading(false); // Set loading to false after request completes
+      setLoading(false);
     }
   };
 
   const loginUser = async (username, password) => {
-    const user = await login(username, password);
-    if (user) {
-      setUser(user);
+    const data = await login(username, password);
+    if (data && data.user) {
+      setUser(data.user); // backend sends { user: {...} }
       nav("/");
     } else {
       alert("Incorrect username or password");
@@ -33,18 +32,29 @@ export const AuthProvider = ({ children }) => {
 
   const logoutUser = async () => {
     await logout();
+    setUser(null);
     nav("/login");
   };
 
-  const registerUser = async (username, email, password, confirm_password) => {
+  const registerUser = async (
+    username,
+    email,
+    password,
+    confirm_password,
+    role = "patient"
+  ) => {
     try {
       if (password === confirm_password) {
-        await register(username, email, password);
-        alert("User successfully registered");
-        nav("/login");
+        const data = await register(username, email, password, role);
+        if (data) {
+          alert("User successfully registered");
+          nav("/login");
+        }
+      } else {
+        alert("Passwords do not match");
       }
     } catch {
-      alert("error registering user");
+      alert("Error registering user");
     }
   };
 

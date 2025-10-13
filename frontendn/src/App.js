@@ -18,7 +18,13 @@ import TimeSlotsView from "./components/timeslots/TimeSlotsView";
 import CView from "./components/consults/CView";
 import UTestView from "./components/userpages/UTestView";
 import NavBar from "./components/NavBar";
+import BookingsView from "./components/booking/BookingsView";
 import CTS from "./components/consults/CTS";
+
+// New patient booking pages
+import TestList from "./components/patient/TestList";
+import ConfirmBooking from "./components/patient/BookingConfirmation";
+import MyBookings from "./components/patient/MyBookings";
 
 function App() {
   const drawerWidth = 240;
@@ -27,7 +33,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          {/* ---------- PUBLIC ROUTES (no NavBar) ---------- */}
+          {/* ---------- PUBLIC ROUTES ---------- */}
           <Route
             path="/login"
             element={
@@ -36,20 +42,13 @@ function App() {
               </Layout>
             }
           />
-          <Route
-            path="/register"
-            element={
-              <Layout>
-                <Register />
-              </Layout>
-            }
-          />
+          <Route path="/register" element={<Register />} />
 
-          {/* ---------- PRIVATE ROUTES (with NavBar) ---------- */}
+          {/* ---------- ADMIN ROUTES ---------- */}
           <Route
             path="/"
             element={
-              <PrivateRoute allowedRoles={["admin"]}>
+              <PrivateRoute allowedRoles={["admin", "patient"]}>
                 <NavBar drawerWidth={drawerWidth} content={<Menu />} />
               </PrivateRoute>
             }
@@ -99,6 +98,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/consultations"
             element={
@@ -107,11 +107,73 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/consultations/:id/timeslots"
             element={
               <PrivateRoute allowedRoles={["admin"]}>
                 <NavBar drawerWidth={drawerWidth} content={<CTS />} />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/available-slots"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <NavBar drawerWidth={drawerWidth} content={<TimeSlotsView />} />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/confirm-booking"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <NavBar
+                  drawerWidth={drawerWidth}
+                  content={<ConfirmBooking />}
+                />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/bookings"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <NavBar drawerWidth={drawerWidth} content={<BookingsView />} />
+              </PrivateRoute>
+            }
+          />
+
+          {/* ---------- PATIENT BOOKING ROUTES ---------- */}
+          <Route
+            path="/tests-list"
+            element={
+              <PrivateRoute allowedRoles={["patient"]}>
+                <NavBar drawerWidth={drawerWidth} content={<TestList />} />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/booking/confirm/:id"
+            element={
+              <PrivateRoute allowedRoles={["patient"]}>
+                <NavBar
+                  drawerWidth={drawerWidth}
+                  content={<ConfirmBooking />}
+                />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/my-bookings"
+            element={
+              <PrivateRoute allowedRoles={["patient"]}>
+                <NavBar drawerWidth={drawerWidth} content={<MyBookings />} />
               </PrivateRoute>
             }
           />

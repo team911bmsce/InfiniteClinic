@@ -17,7 +17,6 @@ import CreateIcon from "@mui/icons-material/Create";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import IconButton from "@mui/material/IconButton";
-import { Button } from "@mui/material";
 import { useAuth } from "../context/useAuth";
 
 function NavBar(props) {
@@ -28,9 +27,7 @@ function NavBar(props) {
   const navigate = useNavigate();
   const { user, logoutUser } = useAuth();
 
-  const changeOpenStatus = () => {
-    setOpen(!open);
-  };
+  const changeOpenStatus = () => setOpen(!open);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -43,52 +40,112 @@ function NavBar(props) {
       <Box sx={{ overflow: "auto" }}>
         <List>
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="" selected={"" === path}>
+            <ListItemButton component={Link} to="/" selected={"/" === path}>
               <ListItemIcon>
                 <HomeFilledIcon />
               </ListItemIcon>
-              <ListItemText primary={"Home"} />
+              <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/tests/"
-              selected={"/tests/" === path}
-            >
-              <ListItemIcon>
-                <InfoIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Tests"} />
-            </ListItemButton>
-          </ListItem>
+          {user?.role === "admin" && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/tests/"
+                  selected={"/tests/" === path}
+                >
+                  <ListItemIcon>
+                    <InfoIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Tests" />
+                </ListItemButton>
+              </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/patients"
-              selected={"/patients" === path}
-            >
-              <ListItemIcon>
-                <InfoIcon />
-              </ListItemIcon>
-              <ListItemText primary={"User"} />
-            </ListItemButton>
-          </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/patients"
+                  selected={"/patients" === path}
+                >
+                  <ListItemIcon>
+                    <InfoIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Users" />
+                </ListItemButton>
+              </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/consultations"
-              selected={"/consultations" === path}
-            >
-              <ListItemIcon>
-                <CreateIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Consultations"} />
-            </ListItemButton>
-          </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/consultations"
+                  selected={"/consultations" === path}
+                >
+                  <ListItemIcon>
+                    <CreateIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Consultations" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/bookings"
+                  selected={"/bookings" === path}
+                >
+                  <ListItemIcon>
+                    <CreateIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Bookings" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/available-slots"
+                  selected={"/available-slots" === path}
+                >
+                  <ListItemIcon>
+                    <CreateIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Time Slots" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
+
+          {user?.role === "patient" && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/tests-list"
+                  selected={"/tests-list" === path}
+                >
+                  <ListItemIcon>
+                    <InfoIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Book Tests" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/my-bookings"
+                  selected={"/my-bookings" === path}
+                >
+                  <ListItemIcon>
+                    <CreateIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="My Bookings" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
 
           {user && (
             <ListItem disablePadding>
@@ -96,7 +153,7 @@ function NavBar(props) {
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Logout"} />
+                <ListItemText primary="Logout" />
               </ListItemButton>
             </ListItem>
           )}
@@ -126,7 +183,6 @@ function NavBar(props) {
         </Toolbar>
       </AppBar>
 
-      {/* Permanent Drawer */}
       <Drawer
         variant="permanent"
         sx={{
@@ -142,7 +198,6 @@ function NavBar(props) {
         {myDrawer}
       </Drawer>
 
-      {/* Temporary Drawer for mobile */}
       <Drawer
         variant="temporary"
         open={open}

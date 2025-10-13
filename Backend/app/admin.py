@@ -6,4 +6,5 @@ admin.site.register(Patient)
 admin.site.register(TimeSlot)
 admin.site.register(ConsultTimeSlot)
 admin.site.register(Consultation)
+admin.site.register(Booking)
 # Register your models here.

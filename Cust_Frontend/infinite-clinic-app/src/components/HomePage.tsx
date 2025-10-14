@@ -1,6 +1,7 @@
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
 import { VisualHero } from './VisualHero';
 import { CategorySection } from './CategorySection';
+import { TrustSection } from './TrustSection';
 
 export const HomePage = () => {
   return (
@@ -8,6 +9,9 @@ export const HomePage = () => {
       <VisualHero />
       <Container maxW="container.lg" py={20}>
         <VStack gap={20} align="stretch">
+          <Box className="section-box">
+            <TrustSection />
+          </Box>
           <Box id="book-a-test" className="section-box">
             <CategorySection />
           </Box>

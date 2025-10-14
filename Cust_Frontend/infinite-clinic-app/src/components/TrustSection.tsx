@@ -4,15 +4,17 @@ import { Link as ScrollLink } from 'react-scroll';
 export const TrustSection = () => {
   return (
     <Box
-      mt={{ base: 4, md: 8 }}
+      maxW="100%"      
+      w="100%"         
+      mx={0}           
+      py={{ base: 10, md: 20 }}
+      mt={0}
       borderRadius="xl"
-      mx={{ base: 4, md: 8 }}
       position="relative"
       overflow="hidden"
-      py={{ base: 10, md: 20 }} // Made this identical to VisualHero for debugging
       bgGradient="radial(circle at 60% 70%, #90caf9 0%, #e3f2fd 65%, white 100%)"
     >
-      <Container maxW="container.xl">
+      <Container maxW="1400px">
         <VStack spacing={6} textAlign="center" position="relative" zIndex={1}>
           <Flex
             align="center"

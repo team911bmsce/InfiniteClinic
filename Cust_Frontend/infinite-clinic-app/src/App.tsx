@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link as ScrollLink } from 'react-scroll';
 
 import { HomePage } from './components/HomePage';
+import { Footer } from './components/Footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,8 +16,8 @@ const Header = () => (
     </Box>
     <Spacer />
     <Flex gap={8} fontWeight="medium">
-      <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-80} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
-      <ScrollLink to="health-plans" smooth={true} duration={500} offset={-80} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
+      <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-120} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
+      <ScrollLink to="health-plans" smooth={true} duration={500} offset={-30} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
       <ScrollLink to="about-us" smooth={true} duration={500} offset={-80} style={{ cursor: 'pointer' }}>About us</ScrollLink>
     </Flex>
     <Spacer />
@@ -73,9 +74,15 @@ function App() {
           </Box>
         </Box>
       </Flex>
-      <Box ref={contentRef} visibility="hidden">
+      
+      <Box ref={contentRef} visibility="hidden" display="flex" flexDirection="column" minHeight="100vh">
         <Header />
-        <HomePage />
+
+        <Box as="main" flex="1">
+          <HomePage />
+        </Box>
+        
+        <Footer />
       </Box>
     </>
   );

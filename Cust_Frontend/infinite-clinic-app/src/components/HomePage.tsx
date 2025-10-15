@@ -1,26 +1,35 @@
-import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
+import { Box, VStack } from '@chakra-ui/react'; // Import VStack here
 import { VisualHero } from './VisualHero';
 import { CategorySection } from './CategorySection';
 import { TrustSection } from './TrustSection';
+import { PricingSection } from './PricingSection';
 
 export const HomePage = () => {
+  const gridPatternStyle = {
+    backgroundImage:
+      'linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)',
+    backgroundSize: '40px 40px',
+    
+    maskImage: 'linear-gradient(to bottom, transparent, black 5%, black 95%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 5%, black 95%, transparent)',
+  };
+
   return (
     <>
       <VisualHero />
-      <Container maxW="container.lg" py={20}>
-        <VStack gap={20} align="stretch">
-          <Box className="section-box">
-            <TrustSection />
-          </Box>
+      <Box sx={gridPatternStyle}>
+        <VStack spacing={10} align="stretch"> 
+          <TrustSection />
+
           <Box id="book-a-test" className="section-box">
             <CategorySection />
           </Box>
+
           <Box id="health-plans" className="section-box">
-            <Heading>Our Health Plans</Heading>
-            <Text mt={4}>This is where you can display the health packages.</Text>
+            <PricingSection />
           </Box>
         </VStack>
-      </Container>
+      </Box>
     </>
   );
 };

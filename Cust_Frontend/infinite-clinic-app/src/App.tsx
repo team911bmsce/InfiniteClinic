@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Spacer, Button, Link as ChakraLink, VStack } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button, Link as ChakraLink, VStack } from '@chakra-ui/react';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link as ScrollLink } from 'react-scroll';
@@ -15,29 +15,30 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <Flex as="header" p={4} borderBottomWidth="1px" alignItems="center" position="sticky" top={0} bg="white" zIndex={5}>
-      <Heading size="md" id="logo-destination">
+    <Flex as="header" p={4} borderBottomWidth="1px" alignItems="center" position="sticky" top={0} bg="white" zIndex={5} justifyContent="space-between">
+      <Heading size="lg" id="logo-destination">
         <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
           Infinite Clinic
         </ChakraLink>
       </Heading>
-      <Spacer />
-      <Flex gap={8} fontWeight="medium">
-        {isHomePage ? (
-          <>
-            <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
-            <ScrollLink to="health-plans" smooth={true} duration={500} offset={-30} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
-            <ScrollLink to="about-us" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>About us</ScrollLink>
-          </>
-        ) : (
-          <ChakraLink as={RouterLink} to="/">Home</ChakraLink>
-        )}
-        <ChakraLink as={RouterLink} to="/faq" _hover={{ textDecoration: 'none' }}>
-          FAQs
-        </ChakraLink>
+
+      <Flex alignItems="center" gap={8}>
+        <Flex gap={6} fontWeight="semibold" fontSize="md"> 
+          {isHomePage ? (
+            <>
+              <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
+              <ScrollLink to="health-plans" smooth={true} duration={500} offset={-30} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
+              <ScrollLink to="about-us" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>About us</ScrollLink>
+            </>
+          ) : (
+            <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>Home</ChakraLink>
+          )}
+          <ChakraLink as={RouterLink} to="/faq" _hover={{ textDecoration: 'none' }}>
+            FAQs
+          </ChakraLink>
+        </Flex>
+        <Button colorScheme="blue" size="md">Log In</Button>
       </Flex>
-      <Spacer />
-      <Button colorScheme="blue">Log In</Button>
     </Flex>
   );
 };

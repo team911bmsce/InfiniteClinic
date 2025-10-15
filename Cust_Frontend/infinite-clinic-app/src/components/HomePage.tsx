@@ -16,20 +16,15 @@ export const HomePage = () => {
     backgroundSize: '40px 40px',
     maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)',
     WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)',
-    zIndex: 0, // Keep the grid in the back
+    zIndex: 0,
   };
 
   return (
     <>
       <VisualHero />
       <TrustSection />
-
-      {/* This Box now acts as a positioning container */}
       <Box position="relative" pt={20}>
-        {/* The grid pattern is now its own element in the background */}
         <Box sx={gridPatternStyle} />
-
-        {/* This Box holds the content and sits on top of the grid */}
         <Box position="relative" zIndex={1}>
           <VStack spacing={10} align="stretch">
             <Box id="book-a-test" className="section-box">

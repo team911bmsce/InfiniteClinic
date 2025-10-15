@@ -3,6 +3,7 @@ import { VisualHero } from './VisualHero';
 import { CategorySection } from './CategorySection';
 import { TrustSection } from './TrustSection';
 import { PricingSection } from './PricingSection';
+import { FaqSection } from './FaqSection';
 
 export const HomePage = () => {
   const gridPatternStyle = {
@@ -16,7 +17,7 @@ export const HomePage = () => {
     backgroundSize: '40px 40px',
     maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)',
     WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)',
-    zIndex: 0,
+    zIndex: 0, 
   };
 
   return (
@@ -26,7 +27,7 @@ export const HomePage = () => {
       <Box position="relative" pt={20}>
         <Box sx={gridPatternStyle} />
         <Box position="relative" zIndex={1}>
-          <VStack spacing={10} align="stretch">
+          <VStack spacing={20} align="stretch">
             <Box id="book-a-test" className="section-box">
               <CategorySection />
             </Box>
@@ -35,6 +36,9 @@ export const HomePage = () => {
             </Box>
           </VStack>
         </Box>
+      </Box>
+      <Box id="faq-section" className="section-box">
+        <FaqSection />
       </Box>
     </>
   );

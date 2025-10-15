@@ -1,4 +1,5 @@
-import { Box, Container, SimpleGrid, VStack, Heading, Text, Link, Flex } from '@chakra-ui/react';
+import { Box, Container, SimpleGrid, VStack, Heading, Text, Flex, Link as ChakraLink } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
@@ -7,14 +8,14 @@ export const Footer = () => {
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
           <VStack align="flex-start" spacing={4}>
             <Heading size="md" color="white">Get Help</Heading>
-            <Link href="#">FAQs</Link>
+            <ChakraLink as={Link} to="/faq">FAQs</ChakraLink>
             <Text>📞 +91 9351012745</Text>
             <Text>📩 idcudaipur@gmail.com</Text>
           </VStack>
 
           <VStack align="flex-start" spacing={4}>
             <Heading size="md" color="white">Explore about us</Heading>
-            <Link href="#">Who we are</Link>
+            <ChakraLink as={Link} to="/about-us">Who we are</ChakraLink>
           </VStack>
           
           <Box />
@@ -30,9 +31,9 @@ export const Footer = () => {
         <Container maxW="container.xl" py={4} display="flex" flexDirection={{ base: 'column', md: 'row' }} justifyContent="space-between" alignItems="center">
           <Text fontSize="sm">© 2025 Infinite Clinic Pvt. Ltd.</Text>
           <Flex gap={6} mt={{ base: 4, md: 0 }}>
-            <Link fontSize="sm">Privacy Policy</Link>
-            <Link fontSize="sm">Grievance Redressal</Link>
-            <Link fontSize="sm">Terms of Use</Link>
+            <ChakraLink as={Link} to="/privacy-policy" fontSize="sm">Privacy Policy</ChakraLink>
+            <ChakraLink as={Link} to="/grievance" fontSize="sm">Grievance Redressal</ChakraLink>
+            <ChakraLink as={Link} to="/terms-of-use" fontSize="sm">Terms of Use</ChakraLink>
           </Flex>
         </Container>
       </Box>

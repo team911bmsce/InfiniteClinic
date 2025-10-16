@@ -6,10 +6,9 @@ import { useState, useEffect } from 'react';
 
 export const PatientInfoModal = ({ isOpen, onClose, cartItem, onSave }: any) => {
   const [patients, setPatients] = useState(cartItem.patients);
-  const [isForSelf, setIsForSelf] = useState('self'); // Manages the "Self/Someone" choice
+  const [isForSelf, setIsForSelf] = useState('self'); 
 
   useEffect(() => {
-    // If we are editing and the first patient is "Self", reflect that in the radio button
     if (cartItem.patients[0]?.name.startsWith('Self')) {
       setIsForSelf('self');
     } else if (cartItem.patients.length > 0 && cartItem.patients[0]?.name !== '') {
@@ -40,7 +39,6 @@ export const PatientInfoModal = ({ isOpen, onClose, cartItem, onSave }: any) => 
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={6} align="stretch">
-            {/* "For Self" Radio buttons */}
             <FormControl>
               <FormLabel>Who is Patient 1?</FormLabel>
               <RadioGroup value={isForSelf} onChange={setIsForSelf}>
@@ -51,9 +49,7 @@ export const PatientInfoModal = ({ isOpen, onClose, cartItem, onSave }: any) => 
               </RadioGroup>
             </FormControl>
 
-            {/* Patient Forms */}
             {patients.map((patient: any, index: number) => {
-              // If it's the first patient AND "self" is selected, show a placeholder
               if (index === 0 && isForSelf === 'self') {
                 return (
                   <Box key={index} p={4} borderWidth="1px" borderRadius="md" bg="gray.50">
@@ -62,7 +58,6 @@ export const PatientInfoModal = ({ isOpen, onClose, cartItem, onSave }: any) => 
                   </Box>
                 );
               }
-              // Otherwise, show the full form
               return (
                 <Box key={index} p={4} borderWidth="1px" borderRadius="md">
                   <Heading size="sm" mb={4}>Patient {index + 1}</Heading>

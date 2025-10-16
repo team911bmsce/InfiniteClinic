@@ -8,7 +8,7 @@ import { Cart } from './Cart';
 import { PatientInfoModal } from './PatientInfoModal';
 import { PatientCountModal } from './PatientCountModal';
 
-// --- Type Definitions ---
+
 interface Test { id: string; name: string; price: number; description: string; prerequisite: string; }
 interface Patient { name: string; age: string; gender: string; }
 interface CartItem extends Test { cartId: string; patients: Patient[]; }
@@ -50,7 +50,6 @@ export const TestBookingPage = () => {
         const patients: Patient[] = Array.from({ length: patientCount }, () => ({ name: '', age: '', gender: '' }));
         const cartId = `${selectedTest.id}-${Date.now()}`;
 
-        // Always open the PatientInfoModal now
         setEditingCartItem({ ...selectedTest, cartId, patients });
         setIsPatientInfoModalOpen(true);
         setIsPatientCountModalOpen(false);

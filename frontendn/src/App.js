@@ -18,13 +18,13 @@ import TimeSlotsView from "./components/timeslots/TimeSlotsView";
 import CView from "./components/consults/CView";
 import UTestView from "./components/userpages/UTestView";
 import NavBar from "./components/NavBar";
-import BookingsView from "./components/booking/BookingsView";
 import CTS from "./components/consults/CTS";
 
 // New patient booking pages
-import TestList from "./components/patient/TestList";
-import ConfirmBooking from "./components/patient/BookingConfirmation";
 import MyBookings from "./components/patient/MyBookings";
+import AvailableSlotsView from "./components/booking/AvailableTimeSlots";
+import ConfirmBookingAdminPage from "./components/booking/ConfirmBookingAdminPage";
+import BookingsView from "./components/booking/BookingsView";
 
 function App() {
   const drawerWidth = 240;
@@ -121,7 +121,10 @@ function App() {
             path="/available-slots"
             element={
               <PrivateRoute allowedRoles={["admin"]}>
-                <NavBar drawerWidth={drawerWidth} content={<TimeSlotsView />} />
+                <NavBar
+                  drawerWidth={drawerWidth}
+                  content={<AvailableSlotsView />}
+                />
               </PrivateRoute>
             }
           />
@@ -132,7 +135,7 @@ function App() {
               <PrivateRoute allowedRoles={["admin"]}>
                 <NavBar
                   drawerWidth={drawerWidth}
-                  content={<ConfirmBooking />}
+                  content={<ConfirmBookingAdminPage />}
                 />
               </PrivateRoute>
             }
@@ -148,27 +151,6 @@ function App() {
           />
 
           {/* ---------- PATIENT BOOKING ROUTES ---------- */}
-          <Route
-            path="/tests-list"
-            element={
-              <PrivateRoute allowedRoles={["patient"]}>
-                <NavBar drawerWidth={drawerWidth} content={<TestList />} />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/booking/confirm/:id"
-            element={
-              <PrivateRoute allowedRoles={["patient"]}>
-                <NavBar
-                  drawerWidth={drawerWidth}
-                  content={<ConfirmBooking />}
-                />
-              </PrivateRoute>
-            }
-          />
-
           <Route
             path="/my-bookings"
             element={

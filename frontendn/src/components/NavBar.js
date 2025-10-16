@@ -122,19 +122,6 @@ function NavBar(props) {
               <ListItem disablePadding>
                 <ListItemButton
                   component={Link}
-                  to="/tests-list"
-                  selected={"/tests-list" === path}
-                >
-                  <ListItemIcon>
-                    <InfoIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Book Tests" />
-                </ListItemButton>
-              </ListItem>
-
-              <ListItem disablePadding>
-                <ListItemButton
-                  component={Link}
                   to="/my-bookings"
                   selected={"/my-bookings" === path}
                 >

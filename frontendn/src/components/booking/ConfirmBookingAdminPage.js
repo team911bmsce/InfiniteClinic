@@ -12,7 +12,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import AxiosInstance from "../Axios";
 
-const ConfirmBooking = () => {
+const ConfirmBookingAdminPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const slot = location.state?.slot;
@@ -158,4 +158,4 @@ const ConfirmBooking = () => {
   );
 };
 
-export default ConfirmBooking;
+export default ConfirmBookingAdminPage;

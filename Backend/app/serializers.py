@@ -156,12 +156,8 @@ class BookingSerializer(serializers.ModelSerializer):
 # ------------------------------
 from django.db import transaction
 
-from rest_framework import serializers
-from django.db import transaction
-from .models import Booking, TimeSlot
-
 class BookingCreateSerializer(serializers.ModelSerializer):
-    """Used when patient creates a booking for themselves."""
+    """Used when admin creates a booking for a patient."""
     patient_name = serializers.CharField(source="patient.first_name", read_only=True)
     test_name = serializers.CharField(source="test.name", read_only=True)
     slot_date = serializers.DateField(source="timeslot.date", read_only=True)
@@ -178,7 +174,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             "slot_date",
             "booking_date",
         )
-        read_only_fields = ("booking_date", "patient")  # patient is read-only
+        read_only_fields = ("booking_date",)
 
     def validate(self, data):
         """Ensure you cannot book a full or unavailable timeslot."""
@@ -190,17 +186,11 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        """Automatically assign patient from request.user and update slot counts."""
-        request = self.context.get("request")
-        user = request.user
-
-        if not hasattr(user, "patient"):
-            raise serializers.ValidationError("Logged in user is not a patient.")
-
-        validated_data["patient"] = user.patient
-
+        """Create booking and automatically update slot counts atomically."""
         with transaction.atomic():
             ts = validated_data["timeslot"]
+
+            # Re-fetch timeslot with select_for_update to prevent race conditions
             ts = TimeSlot.objects.select_for_update().get(id=ts.id)
 
             if not ts.unlimited_patients:
@@ -211,6 +201,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
                 ts.available = ts.booked_slots < ts.max_patients
                 ts.save(update_fields=["booked_slots", "available_slots", "available"])
 
+            # Create the booking
             booking = Booking.objects.create(**validated_data)
 
         return booking

@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Button, Link as ChakraLink, VStack } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button, Link as ChakraLink, VStack} from '@chakra-ui/react';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link as ScrollLink } from 'react-scroll';
@@ -8,11 +8,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HomePage } from './components/HomePage';
 import { Footer } from './components/Footer';
 import { FaqPage } from './components/FaqPage';
-import { ScrollToTop } from './components/ScrollToTop';
+import { AboutUs } from './components/AboutUs';
+
 
 const Header = () => {
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
+  const path = location.pathname;
 
   return (
     <Flex as="header" p={4} borderBottomWidth="1px" alignItems="center" position="sticky" top={0} bg="white" zIndex={5} justifyContent="space-between">
@@ -23,19 +24,32 @@ const Header = () => {
       </Heading>
 
       <Flex alignItems="center" gap={8}>
-        <Flex gap={6} fontWeight="semibold" fontSize="md"> 
-          {isHomePage ? (
+        <Flex gap={6} fontWeight="medium" fontSize="md">
+          {/* If on the homepage, show scroll links */}
+          {path === '/' ? (
             <>
               <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
               <ScrollLink to="health-plans" smooth={true} duration={500} offset={-30} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
               <ScrollLink to="about-us" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>About us</ScrollLink>
             </>
           ) : (
+            // If on any other page, show a link to Home
             <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>Home</ChakraLink>
           )}
-          <ChakraLink as={RouterLink} to="/faq" _hover={{ textDecoration: 'none' }}>
-            FAQs
-          </ChakraLink>
+
+          {/* If NOT on the FAQ page, show a link to it */}
+          {path !== '/faq' && (
+            <ChakraLink as={RouterLink} to="/faq" _hover={{ textDecoration: 'none' }}>
+              FAQs
+            </ChakraLink>
+          )}
+          
+          {/* If you ARE on the FAQ page, show a link to "About us" instead */}
+          {path === '/faq' && (
+            <ChakraLink as={RouterLink} to="/about-us" _hover={{ textDecoration: 'none' }}>
+              About us
+            </ChakraLink>
+          )}
         </Flex>
         <Button colorScheme="blue" size="md">Log In</Button>
       </Flex>
@@ -107,11 +121,15 @@ function App() {
       </Flex>
       
       <Box>
-        <ScrollToTop />
-        <AnimatePresence mode="wait">
+        <AnimatePresence 
+          mode="wait" 
+          onExitComplete={() => window.scrollTo(0, 0)}
+        >
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
             <Route path="/faq" element={<MainLayout><FaqPage /></MainLayout>} />
+            {/* Added the route for the new About Us page */}
+            <Route path="/about-us" element={<MainLayout><AboutUs /></MainLayout>} />
           </Routes>
         </AnimatePresence>
       </Box>
@@ -120,3 +138,4 @@ function App() {
 }
 
 export default App;
+

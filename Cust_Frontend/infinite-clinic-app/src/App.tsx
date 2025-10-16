@@ -9,6 +9,7 @@ import { HomePage } from './components/HomePage';
 import { Footer } from './components/Footer';
 import { FaqPage } from './components/FaqPage';
 import { AboutUs } from './components/AboutUs';
+import { TestBookingPage } from './components/TestBookingPage';
 
 
 const Header = () => {
@@ -124,6 +125,7 @@ function App() {
             <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
             <Route path="/faq" element={<MainLayout><FaqPage /></MainLayout>} />
             <Route path="/about-us" element={<MainLayout><AboutUs /></MainLayout>} />
+            <Route path="/all-tests" element={<MainLayout><TestBookingPage /></MainLayout>} />
           </Routes>
         </AnimatePresence>
       </Box>

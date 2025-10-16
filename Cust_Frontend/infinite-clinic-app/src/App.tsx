@@ -25,7 +25,6 @@ const Header = () => {
 
       <Flex alignItems="center" gap={8}>
         <Flex gap={6} fontWeight="medium" fontSize="md">
-          {/* If on the homepage, show scroll links */}
           {path === '/' ? (
             <>
               <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
@@ -33,18 +32,14 @@ const Header = () => {
               <ScrollLink to="about-us" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>About us</ScrollLink>
             </>
           ) : (
-            // If on any other page, show a link to Home
             <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>Home</ChakraLink>
           )}
-
-          {/* If NOT on the FAQ page, show a link to it */}
           {path !== '/faq' && (
             <ChakraLink as={RouterLink} to="/faq" _hover={{ textDecoration: 'none' }}>
               FAQs
             </ChakraLink>
           )}
           
-          {/* If you ARE on the FAQ page, show a link to "About us" instead */}
           {path === '/faq' && (
             <ChakraLink as={RouterLink} to="/about-us" _hover={{ textDecoration: 'none' }}>
               About us
@@ -128,7 +123,6 @@ function App() {
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
             <Route path="/faq" element={<MainLayout><FaqPage /></MainLayout>} />
-            {/* Added the route for the new About Us page */}
             <Route path="/about-us" element={<MainLayout><AboutUs /></MainLayout>} />
           </Routes>
         </AnimatePresence>

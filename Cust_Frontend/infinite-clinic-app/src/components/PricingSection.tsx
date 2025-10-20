@@ -48,7 +48,7 @@ export const PricingSection = () => {
     <Container maxW="container.xxl" py={20}>
       <VStack spacing={4} textAlign="center" mb={10}>
         <Heading size="3xl">Flexible Plans for Your Health</Heading>
-        <Text fontSize="xl" color="gray.600">
+        <Text fontSize="xl" color="#31373C">
           Choose a package that's right for you. All prices are transparent and affordable.
         </Text>
       </VStack>

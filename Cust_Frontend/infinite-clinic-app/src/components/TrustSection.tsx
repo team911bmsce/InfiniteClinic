@@ -12,15 +12,15 @@ export const TrustSection = () => {
       borderRadius="xl"
       position="relative"
       overflow="hidden"
-      bgGradient="radial(circle at 60% 70%, #90caf9 0%, #e3f2fd 65%, white 100%)"
+      bgGradient="radial(circle, #ffffffff 20%, #CFE4DE 50%,  #384A5C 130%,)"
     >
       <Container maxW="1400px">
         <VStack spacing={6} textAlign="center" position="relative" zIndex={1}>
           <Flex
             align="center"
             justify="center"
-            bg="pink.100"
-            color="pink.800"
+            bg="#AAD6CA"
+            color="#31373c"
             px={4}
             py={2}
             borderRadius="full"
@@ -28,8 +28,8 @@ export const TrustSection = () => {
             fontWeight="medium"
             mb={4}
           >
-            <Box as="span" mr={2}>🌟</Box> We care for your health like family — experience hassle-free testing with us!
-            <Link href="#" ml={1} textDecoration="underline" _hover={{ color: 'pink.700' }}>Find us now</Link>
+            <Box as="span" mr={2}></Box> We care for your health like family — experience hassle-free testing with us!
+            <Link href="#" ml={1} textDecoration="underline" _hover={{ color: '#ffffffff', backgroundColor: '#31373C'}}>Find us now</Link>
           </Flex>
 
           <Heading as="h2" size="3xl" maxW="800px">
@@ -41,7 +41,19 @@ export const TrustSection = () => {
           </Text>
 
           <ScrollLink to="health-plans" smooth={true} duration={500} offset={-80}>
-            <Button colorScheme="blue" size="lg" px={8} py={6} fontSize="xl" mt={6}>
+            <Button color="#FFFFFF"
+            backgroundColor='#384A5C'
+                            _hover={{
+                  bg: '#ffffff',
+                  color: 'black',
+                  borderWidth: '2px',
+                  borderColor: '#000000'
+                }}
+            size="lg"
+            px={8}
+            py={6}
+            fontSize="xl"
+            mt={6}>
               View Health Plans
             </Button>
           </ScrollLink>

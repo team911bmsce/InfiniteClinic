@@ -5,6 +5,7 @@ import { TrustSection } from './TrustSection';
 import { PricingSection } from './PricingSection';
 import { FaqSection } from './FaqSection';
 
+
 export const HomePage = () => {
   const gridPatternStyle = {
     position: 'absolute',
@@ -36,7 +37,7 @@ export const HomePage = () => {
             </Box>
           </VStack>
         </Box>
-      </Box>
+      </Box>  
       <Box id="faq-section" className="section-box">
         <FaqSection />
       </Box>

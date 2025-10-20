@@ -36,7 +36,15 @@ export const FaqPage = () => {
           </AccordionItem>
         ))}
       </Accordion>
-      <Button as={RouterLink} to="/" colorScheme="blue" mt={10}>
+      <Button as={RouterLink} to="/"
+      color='#ffffff' 
+            backgroundColor='#384A5C'
+                            _hover={{
+                  bg: '#D2DEEA',
+                  color: 'black',
+                  borderWidth: '2px',
+                  borderColor: '#000000'
+                }} mt={10}>
         Back to Home
       </Button>
     </Container>

@@ -24,8 +24,8 @@ export const CategorySection = () => {
       <Flex justify="center" gap={{ base: 6, md: 10 }} wrap="wrap">
         {popularTests.map((test) => {
           const bubbleContent = (
-            <VStack spacing={3} cursor="pointer" _hover={{ color: 'blue.500', transform: 'scale(1.05)' }} transition="transform 0.2s">
-              <Circle size="100px" bg="blue.50" color="blue.500">
+            <VStack spacing={3} cursor="pointer" _hover={{ color: '#31373c', transform: 'scale(1.05)' }} transition="transform 0.2s">
+              <Circle size="100px" bg="#D7EBF0" color="#384A5C" _hover={{ color: '#D2DEEA', background:'#404a3d'}}>
                 <test.icon size="40px" />
               </Circle>
               <Text fontWeight="medium" textAlign="center">{test.name}</Text>

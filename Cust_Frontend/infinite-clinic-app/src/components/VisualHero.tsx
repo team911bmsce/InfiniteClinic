@@ -1,11 +1,11 @@
-import { Box, Button, Container, Flex, Heading, Text, VStack, Image as ChakraImage } from '@chakra-ui/react';
+import { Box, Button, Container, Flex, Heading, Text, VStack, Image as ChakraImage, color } from '@chakra-ui/react';
 import { Link as ScrollLink } from 'react-scroll';
 
 export const VisualHero = () => {
   return (
     <Box
-      bg="blue.600"
-      color="white"
+      bg="#D7EBF0"
+      color="#31373C"
       py={{ base: 10, md: 20 }}
       mt={{ base: 4, md: 8 }}
       borderRadius="xl"
@@ -29,11 +29,27 @@ export const VisualHero = () => {
             <Heading as="h1" fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }} lineHeight="1.1" mb={4}>
               Book Lab Tests Online
             </Heading>
-            <Text fontSize={{ base: 'md', md: 'xl' }} color="gray.200" maxW="500px">
+            <Text fontSize={{ base: 'md', md: 'xl' }} color="#31373C" maxW="500px">
               Get accurate diagnostic results quickly. Choose from a wide range of tests and schedule appointments with ease.
             </Text>
             <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-80}>
-              <Button colorScheme="whiteAlpha" size="lg" px={8} py={6} fontSize="xl" rightIcon={<Box as="span" ml={2}>&rarr;</Box>} mt={6}>
+              <Button 
+                bg="#384A5C"
+                color="#FFFFFF"
+                size="lg" 
+                px={8} 
+                py={6} 
+                fontSize="xl" 
+                rightIcon={<Box as="span" ml={2}>&rarr;</Box>} 
+                mt={6}
+                borderWidth="2px"
+                borderColor="transparent"
+                _hover={{
+                  bg: '#ffffff',
+                  color: 'black',
+                  borderColor: '#000000'
+                }}
+              >
                 Explore Tests
               </Button>
             </ScrollLink>

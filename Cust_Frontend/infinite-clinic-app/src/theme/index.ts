@@ -1,4 +1,5 @@
-import { extendTheme } from '@chakra-ui/react';
+import { background, extendTheme } from '@chakra-ui/react';
+import { color } from 'framer-motion';
 
 const theme = extendTheme({
   fonts: {
@@ -18,14 +19,21 @@ const theme = extendTheme({
       baseStyle: {
         borderRadius: 'full',
         fontWeight: 'semibold',
+        color: "#ffffff",
         transition: 'all 0.2s ease-in-out',
+        background: "#384A5C"
+
+        
       },
+      
       sizes: {
         lg: {
           px: '8',
           fontSize: 'lg',
         },
       },
+
+
     },
     Heading: {
       sizes: {
@@ -36,4 +44,4 @@ const theme = extendTheme({
   },
 });
 
-export default theme;
+export default theme; 

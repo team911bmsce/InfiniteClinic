@@ -6,9 +6,9 @@ export const PricingCard = ({ plan, isActive, onMouseEnter, onMouseLeave, id }: 
     <VStack
       id={id}
       p={8}
-      bg={isActive ? 'blue.50' : 'gray.50'}
+      bg={isActive ? '#D7EBF090' : '#ADC1D690'}
       borderWidth="2px"
-      borderColor={isActive ? 'blue.500' : 'gray.200'}
+      borderColor={isActive ? '#384A5C' : '#404A3D'}
       borderRadius="xl"
       spacing={6}
       align="stretch"
@@ -25,12 +25,12 @@ export const PricingCard = ({ plan, isActive, onMouseEnter, onMouseLeave, id }: 
       <List spacing={3}>
         {plan.features.map((feature: string, index: number) => (
           <ListItem key={index}>
-            <ListIcon as={FaCheckCircle} color="green.500" />
+            <ListIcon as={FaCheckCircle} color="#02966fff" />
             {feature}
           </ListItem>
         ))}
       </List>
-      <Button colorScheme={isActive ? 'blue' : 'gray'} mt="auto" pt={6} pb={6}>
+      <Button color={isActive ? 'WHITE' : 'BLACK'} backgroundColor={isActive ? '#384A5C':'#ADD8E6'}borderWidth='2px' borderColor='#31373C' _hover={{backgroundColor:'white', color: 'black'}}mt="auto" pt={6} pb={6}>
         Book Now
       </Button>
     </VStack>

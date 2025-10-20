@@ -33,7 +33,7 @@ export const FaqSection = () => {
             </AccordionItem>
           ))}
         </Accordion>
-        <Button as={RouterLink} to="/faq" colorScheme="blue" variant="outline" size="lg">
+        <Button as={RouterLink} to="/faq" backgroundColor='#384A5C' color="#ffffff" _hover={{backgroundColor:'#D2DEEA', color: '#31373c', borderWidth:'2px', borderColor:'#31373C'}} size="lg">
           View All FAQs
         </Button>
       </VStack>

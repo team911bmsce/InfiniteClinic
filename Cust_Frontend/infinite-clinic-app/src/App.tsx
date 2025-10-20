@@ -30,7 +30,7 @@ const Header = () => {
             <>
               <ScrollLink to="book-a-test" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>Book a test</ScrollLink>
               <ScrollLink to="health-plans" smooth={true} duration={500} offset={-30} style={{ cursor: 'pointer' }}>Health plans</ScrollLink>
-              <ScrollLink to="about-us" smooth={true} duration={500} offset={-150} style={{ cursor: 'pointer' }}>About us</ScrollLink>
+              
             </>
           ) : (
             <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>Home</ChakraLink>
@@ -42,12 +42,27 @@ const Header = () => {
           )}
           
           {path === '/faq' && (
-            <ChakraLink as={RouterLink} to="/about-us" _hover={{ textDecoration: 'none' }}>
+            <ChakraLink as={RouterLink} to="/AboutUs" _hover={{ textDecoration: 'none' }}>
+              About us
+            </ChakraLink>
+          )}
+
+          {path === '/' && (
+            <ChakraLink as={RouterLink} to="/AboutUs" _hover={{ textDecoration: 'none' }}>
               About us
             </ChakraLink>
           )}
         </Flex>
-        <Button colorScheme="blue" size="md">Log In</Button>
+        <Button 
+        backgroundColor='#384A5C'
+        color='white'
+        size="md"
+                        _hover={{
+                          bg: '#D7EBF0',
+                          color: 'black',
+                          borderWidth: '2px',
+                          borderColor: '#000000'
+                        }}>Log In</Button>
       </Flex>
     </Flex>
   );
@@ -124,7 +139,7 @@ function App() {
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
             <Route path="/faq" element={<MainLayout><FaqPage /></MainLayout>} />
-            <Route path="/about-us" element={<MainLayout><AboutUs /></MainLayout>} />
+            <Route path="/AboutUs" element={<MainLayout><AboutUs /></MainLayout>} />
             <Route path="/all-tests" element={<MainLayout><TestBookingPage /></MainLayout>} />
           </Routes>
         </AnimatePresence>

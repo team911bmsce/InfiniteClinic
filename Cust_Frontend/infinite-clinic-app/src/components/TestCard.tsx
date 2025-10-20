@@ -30,7 +30,7 @@ export const TestCard = ({ test, cartItem, onAdd, onUpdateQuantity }: any) => {
             <Text fontSize="xl" fontWeight="bold">₹{test.price}</Text>
             <Spacer />
             {quantity === 0 ? (
-              <Button colorScheme="blue" onClick={onAdd}>Add</Button>
+              <Button backgroundColor='#ADD8E6' color="black" _hover={{color:'white', backgroundColor: '#384a5c', borderWidth:'1px', borderColor: '#31373C'}} onClick={onAdd}>Add</Button>
             ) : (
               <HStack bg="gray.100" borderRadius="full">
                 <IconButton

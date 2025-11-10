@@ -4,8 +4,24 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 import razorpay
+
+from rest_framework import viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import (
+    Patient, MemberPatient,
+    Consultation, ConsultTimeSlot,
+    Test, TimeSlot,
+    Cart, CartItem
+)
+from .serializers import (
+    PatientSerializer, MemberPatientSerializer,
+    ConsultationSerializer, ConsultTimeSlotSerializer,
+    TestSerializer, TimeSlotSerializer,
+    CartSerializer, CartItemSerializer
+)
 
 from .models import *
 from .serializers import *
@@ -29,24 +45,19 @@ def home(request):
 # ------------------------------
 # 📦 PACKAGE CRUD
 # ------------------------------
-class PackageViewSet(viewsets.ModelViewSet):
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
 # ------------------------------
 # 🧍 PATIENT CRUD
 # ------------------------------
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class MemberPatientViewSet(viewsets.ModelViewSet):
+    queryset = MemberPatient.objects.all()
+    serializer_class = MemberPatientSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 # ------------------------------
@@ -56,33 +67,65 @@ class TestViewSet(viewsets.ModelViewSet):
     queryset = Test.objects.all()
     serializer_class = TestSerializer
     permission_classes = [permissions.AllowAny]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'package']
 
 
 # ------------------------------
 # ⏰ TIMESLOT CRUD + Filters
 # ------------------------------
+from rest_framework import viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+# from .models import TimeSlot # Make sure your model is imported
+# from .serializers import TimeSlotSerializer # Make sure your serializer is imported
+
 class TimeSlotViewSet(viewsets.ModelViewSet):
     serializer_class = TimeSlotSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['test', 'date', 'available']
+    # 'test' has been removed from filterset_fields
+    filterset_fields = ['date', 'available']
 
     def get_queryset(self):
         queryset = TimeSlot.objects.all()
-        test_id = self.request.query_params.get("test_id")
+        # 'test_id' parameter and filtering logic have been removed
         date = self.request.query_params.get("date")
         available = self.request.query_params.get("available")
 
-        if test_id:
-            queryset = queryset.filter(test_id=test_id)
         if date:
             queryset = queryset.filter(date=date)
         if available in ['true', 'false']:
             queryset = queryset.filter(available=(available == 'true'))
 
         return queryset
+
+
+
+
+# ------------------------------
+# 🛒 CART
+# ------------------------------
+class CartViewSet(viewsets.ModelViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # return only cart of current user
+        patient = getattr(self.request.user, "patient_profile", None)
+        if patient:
+            return Cart.objects.filter(patient=patient)
+        return Cart.objects.none()
+
+
+class CartItemViewSet(viewsets.ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        patient = getattr(self.request.user, "patient_profile", None)
+        if patient and hasattr(patient, "cart"):
+            return CartItem.objects.filter(cart=patient.cart)
+        return CartItem.objects.none()
 
 
 # ------------------------------
@@ -115,71 +158,6 @@ class ConsultTimeSlotViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(date=date)
 
         return queryset
-
-
-# ------------------------------
-# 🧾 BOOKING CRUD
-# ------------------------------
-class BookingViewSet(viewsets.ModelViewSet):
-    """
-    Supports:
-      - GET (list/filter bookings)
-      - POST (create new booking)
-      - DELETE / PUT for admin management
-    """
-    queryset = Booking.objects.select_related("patient", "test", "timeslot").all()
-    permission_classes = [permissions.AllowAny]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['test', 'timeslot__date']
-
-    def get_queryset(self):
-        # Return only bookings of the logged-in patient if ?mine=true
-        qs = super().get_queryset()
-        mine = self.request.query_params.get("mine")
-        if mine and self.request.user.role == "patient":
-            return qs.filter(patient__user=self.request.user)
-        return qs
-
-    def get_serializer_class(self):
-        if self.action in ['create', 'update']:
-            return BookingCreateSerializer
-        return BookingSerializer
-
-    def perform_create(self, serializer):
-        """
-        Handles booking creation and updates related TimeSlot counters.
-        Prevents overbooking for limited slots.
-        """
-        timeslot = serializer.validated_data['timeslot']
-
-        # Prevent booking if slot unavailable or full
-        if not timeslot.available:
-            raise serializers.ValidationError({"timeslot": "This timeslot is not available."})
-        if not timeslot.unlimited_patients and timeslot.booked_slots >= timeslot.max_patients:
-            raise serializers.ValidationError({"timeslot": "This timeslot is fully booked."})
-
-        # Save booking
-        booking = serializer.save()
-
-        # Update slot counters
-        if not timeslot.unlimited_patients:
-            timeslot.booked_slots += 1
-            timeslot.available_slots = max(timeslot.max_patients - timeslot.booked_slots, 0)
-            timeslot.available = timeslot.booked_slots < timeslot.max_patients
-        timeslot.save()
-
-        return booking
-    
-    def get_serializer_class(self):
-        if self.action == "create":
-            return BookingCreateSerializer
-        return BookingSerializer
-
-    def get_serializer_context(self):
-        # pass request to serializer
-        context = super().get_serializer_context()
-        context["request"] = self.request
-        return context
 
 
 # ------------------------------    
